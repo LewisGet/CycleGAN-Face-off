@@ -9,6 +9,7 @@ from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
 import sys
+import ssim
 
 
 class CycleGANModel(BaseModel):
@@ -56,6 +57,10 @@ class CycleGANModel(BaseModel):
             self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
             self.criterionCycle = torch.nn.L1Loss()
             self.criterionIdt = torch.nn.L1Loss()
+            if opt.with_ssim:
+                self.criterionSSIM = ssim.SSIM()
+                self.optimizer_SSIM_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()), 
+                                                lr=opt.lr, betas=(opt.beta1, 0.999))
             # initialize optimizers
             self.optimizer_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()),
                                                 lr=opt.lr, betas=(opt.beta1, 0.999))
