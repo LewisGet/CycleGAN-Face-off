@@ -33,6 +33,7 @@ while ssim_value < 0.95:
     optimizer.zero_grad()
     ssim_out = -ssim_loss(img1, img2)
     ssim_value = - ssim_out.data[0]
+    pdb.set_trace()
     print(ssim_value)
     ssim_out.backward()
     optimizer.step()

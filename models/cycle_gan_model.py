@@ -8,7 +8,7 @@ import util.util as util
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
-import sys
+import sys, pdb
 import ssim
 
 
@@ -59,8 +59,6 @@ class CycleGANModel(BaseModel):
             self.criterionIdt = torch.nn.L1Loss()
             if opt.with_ssim:
                 self.criterionSSIM = ssim.SSIM()
-                self.optimizer_SSIM_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()), 
-                                                lr=opt.lr, betas=(opt.beta1, 0.999))
             # initialize optimizers
             self.optimizer_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()),
                                                 lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -156,11 +154,15 @@ class CycleGANModel(BaseModel):
         # Forward cycle loss
         self.rec_A = self.netG_B.forward(self.fake_B)
         self.loss_cycle_A = self.criterionCycle(self.rec_A, self.real_A) * lambda_A
+        # Forward SSIM loss
+        self.loss_ssim_A = -self.criterionSSIM(self.real_A, self.rec_A)
         # Backward cycle loss
         self.rec_B = self.netG_A.forward(self.fake_A)
         self.loss_cycle_B = self.criterionCycle(self.rec_B, self.real_B) * lambda_B
+        # Backward SSIM loss
+        self.loss_ssim_B = -self.criterionSSIM(self.real_B, self.rec_B)
         # combined loss
-        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B
+        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_ssim_A + self.loss_ssim_B
         self.loss_G.backward()
 
     def optimize_parameters(self):
@@ -183,17 +185,20 @@ class CycleGANModel(BaseModel):
         D_A = self.loss_D_A.data[0]
         G_A = self.loss_G_A.data[0]
         Cyc_A = self.loss_cycle_A.data[0]
+        SSIM_A = -self.loss_ssim_A.data[0]
         D_B = self.loss_D_B.data[0]
         G_B = self.loss_G_B.data[0]
         Cyc_B = self.loss_cycle_B.data[0]
+        SSIM_B = -self.loss_ssim_B.data[0]
+        # we didn't use identity loss with SSIM loss at the same time
         if self.opt.identity > 0.0:
             idt_A = self.loss_idt_A.data[0]
             idt_B = self.loss_idt_B.data[0]
             return OrderedDict([('D_A', D_A), ('G_A', G_A), ('Cyc_A', Cyc_A), ('idt_A', idt_A),
                                 ('D_B', D_B), ('G_B', G_B), ('Cyc_B', Cyc_B), ('idt_B', idt_B)])
         else:
-            return OrderedDict([('D_A', D_A), ('G_A', G_A), ('Cyc_A', Cyc_A),
-                                ('D_B', D_B), ('G_B', G_B), ('Cyc_B', Cyc_B)])
+            return OrderedDict([('D_A', D_A), ('G_A', G_A), ('Cyc_A', Cyc_A), ('SSIM_A', SSIM_A),
+                                ('D_B', D_B), ('G_B', G_B), ('Cyc_B', Cyc_B), ('SSIM_B', SSIM_B)])
 
     def get_current_visuals(self):
         real_A = util.tensor2im(self.real_A.data)
