@@ -5,4 +5,4 @@
 # sudo python -m visdom.server
 
 # training
-python train.py --dataroot russ2qi1080 --display_id 1 --name russ2qi1080 --model cycle_gan --checkpoints_dir checkpoints/
+python train.py --dataroot datasets/1russ2wu --display_id 1 --name 1russ2wu --model cycle_gan --checkpoints_dir checkpoints/ --gpu_ids 1

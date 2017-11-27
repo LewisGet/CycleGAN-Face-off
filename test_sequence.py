@@ -1,8 +1,8 @@
 # Note that ".mkv" file can be played using VLC under mac os
 
 # configurations
-test_video_path = 'datasets/test/test3.MOV'
-experiment_name = "1russ2wu"
+test_video_path = 'datasets/test/test1.MOV'
+experiment_name = "2russ2qi"
 epoch = 200
 #
 
