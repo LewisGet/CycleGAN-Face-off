@@ -4,7 +4,7 @@ from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
 import PIL
-import random
+import random, pdb
 
 class UnalignedDataset(BaseDataset):
     def initialize(self, opt):
@@ -25,7 +25,11 @@ class UnalignedDataset(BaseDataset):
     def __getitem__(self, index):
         A_path = self.A_paths[index % self.A_size]
         index_A = index % self.A_size
-        index_B = random.randint(0, self.B_size - 1)
+        #index_B = random.randint(0, self.B_size - 1)
+        if self.opt.phase == 'test':
+            index_B = index % self.B_size
+        else:
+            index_B = randon.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
         # print('(A, B) = (%d, %d)' % (index_A, index_B))
         A_img = Image.open(A_path).convert('RGB')
