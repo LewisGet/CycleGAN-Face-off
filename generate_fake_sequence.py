@@ -11,6 +11,10 @@ import cv2, os, sys, pdb, shutil
 def mkdir_if_not_exist(path):
     if not os.path.exists(path):
         os.makedirs(path)
+    else:
+        #delete all in the path
+        shutil.rmtree(path)
+        os.makedirs(path)
 
 def main():
     current_dir = os.getcwd()
@@ -28,7 +32,7 @@ def main():
     extract_folder_testB = os.path.join(extract_folder, 'testB')
     mkdir_if_not_exist(extract_folder_testB)
     copy_command = "cp %s/* %s/" % (extract_folder_testA, extract_folder_testB)
-    extract_video_command = "ffmpeg -i " + resize_video_path + " " + extract_folder_testA + "/%03d.jpg"
+    extract_video_command = "ffmpeg -i " + resize_video_path + " " + extract_folder_testA + "/%03d.png"
     os.system(extract_video_command)
     os.system(copy_command)
 
@@ -57,8 +61,11 @@ def main():
 
     for i in range(extract_files_num):
         fake_frame_name = os.path.join(fake_folder, ("%03d_fake_A.png" % (i+1)))
-        if os.path.exists(fake_frame_name):
-            img = cv2.imread(fake_frame_name)
+        real_frame_name = os.path.join(extract_folder_testA, ("03d.png" % (i+1)))
+        if os.path.exists(fake_frame_name) and os.path.exists(real_frame_name):
+            fake_img = cv2.imread(fake_frame_name)
+            real_img = cv2.resize(cv2.imread(real_frame_name), (256, 256))
+            img = np.concatenate((real_img, fake_img), axis=1)
             out.write(img)
             print("writing %s" % fake_frame_name)
         else:
