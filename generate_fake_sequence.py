@@ -1,5 +1,11 @@
 # Note that ".mkv" file can be played using VLC under mac os
 
+# Please copy drive/707/Original Video/testX.MOV to datasets/test/ folder and run this 
+
+# test1.MOV: qiye
+# test2.MOV: xiaohan
+# test3/4.MOV: shangxuan
+
 # configurations
 test_video_path = 'datasets/test/test3.MOV'
 experiment_name = "1russ2wu"
