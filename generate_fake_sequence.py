@@ -1,12 +1,13 @@
 # Note that ".mkv" file can be played using VLC under mac os
 
 # configurations
-test_video_path = 'datasets/test/test1.MOV'
-experiment_name = "2russ2qi"
+test_video_path = 'datasets/test/test3.MOV'
+experiment_name = "1russ2wu"
 epoch = 200
 #
 
 import cv2, os, sys, pdb, shutil
+import numpy as np
 
 def mkdir_if_not_exist(path):
     if not os.path.exists(path):
@@ -57,14 +58,15 @@ def main():
     # combine all output images to get a full video
     output_video_no_sound_path = test_video_path.replace('.MOV', '_no_sound.avi')
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    out = cv2.VideoWriter(os.path.join(current_dir, output_video_no_sound_path),fourcc, 30.0, (256, 256), True)
+    out = cv2.VideoWriter(os.path.join(current_dir, output_video_no_sound_path),fourcc, 30.0, (512, 256), True)
 
     for i in range(extract_files_num):
         fake_frame_name = os.path.join(fake_folder, ("%03d_fake_A.png" % (i+1)))
-        real_frame_name = os.path.join(extract_folder_testA, ("03d.png" % (i+1)))
+        real_frame_name = os.path.join(extract_folder_testA, ("%03d.png" % (i+1)))
         if os.path.exists(fake_frame_name) and os.path.exists(real_frame_name):
             fake_img = cv2.imread(fake_frame_name)
             real_img = cv2.resize(cv2.imread(real_frame_name), (256, 256))
+            #pdb.set_trace()
             img = np.concatenate((real_img, fake_img), axis=1)
             out.write(img)
             print("writing %s" % fake_frame_name)
